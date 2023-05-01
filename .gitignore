@@ -1,2 +1,5 @@
 # Ignore the thoughts
 Рассуждения над задачей.txt
+
+# ignore the env files
+*.env
