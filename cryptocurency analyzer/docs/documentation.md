@@ -6,7 +6,8 @@ Alphavantage API. Here is an example of using DailyExchange function
 of the API:
 ----------------------------------------------------------------
 
-<# Create an instance of GetURLRequest
+```Python
+# Create an instance of GetURLRequest
 url_request = GetURLRequest()
 
 # Set the strategy to CurrentExchange
@@ -22,12 +23,14 @@ kwargs = {
 
 # Call form_url on the GetURLRequest instance with the keyword arguments
 url = url_request.form_url(**kwargs)
-print(url)>
+print(url)
+```
 
 
 ## Example of using CurentExchange:
 
-<# Create an instance of GetURLRequest
+```Python
+# Create an instance of GetURLRequest
 url_request = GetURLRequest()
 
 # Set the strategy to CurrentExchange
@@ -43,7 +46,8 @@ kwargs = {
 
 # Call form_url on the GetURLRequest instance with the keyword arguments
 url = url_request.form_url(**kwargs)
-print(url)>
+print(url)
+```
 
 You have to provide parametres in the kwargs dict with the
 valid parameters that a mentioned at https://www.alphavantage.co/documentation/
@@ -53,7 +57,8 @@ valid parameters that a mentioned at https://www.alphavantage.co/documentation/
 ----------------------------------------------------------------
 
 ### Example:
-<"""
+
+```Python
 vantage_api = TokenColector(token_name="VANTAGE", file_name="./API.env")
 vantage_token = vantage_api.get_api_key()
 coin_instance = DataCollector("ETH", "USDT", vantage_token)
@@ -69,7 +74,7 @@ kwargs = {
 url_adress = url_instance.form_url(**kwargs)
 
 print(asyncio.run(coin_instance.get_coin_price(url_adress)))
-""">
+```
 
 N.B We have three different instances:
 TokenCollector for automatic generation of tokens from the *.env files
