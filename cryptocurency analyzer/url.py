@@ -1,3 +1,7 @@
+"""
+ Module designed to quickly create url for current API
+"""
+
 from abc import ABC, abstractmethod
 
 
@@ -7,6 +11,15 @@ URLS_API = {
 
 
 class URLGeter(ABC):
+    """
+    URLGeter Child of abstract helper class
+
+    Parent of different classes that are used to form
+    url according to the https://www.alphavantage.co/documentation/
+
+    Args:
+        ABC (Class): Helper for creating inheritance hierarchy
+    """
     @abstractmethod
     def get_url(self, **kwargs: dict) -> str:
         """
@@ -17,7 +30,7 @@ class URLGeter(ABC):
         Args:
             kwargs (dict): dictionary with aditional
             parametres of API.
-            See the documentation: 
+            See the documentation:
             https://www.alphavantage.co/documentation/
 
         Returns:
@@ -28,7 +41,7 @@ class URLGeter(ABC):
 
 class CurrentExchange(URLGeter):
     """
-    CurrentExchange 
+    CurrentExchange
 
     _extended_summary_
 
@@ -102,8 +115,17 @@ class DailyExchange(URLGeter):
 
 
 class GetURLRequest:
+    """
+     Class to handle different methods depending on context
+    """
 
     def set_strategy(self, strategy: URLGeter):
+        """
+        set_strategy Define strategy for future calls
+
+        Args:
+            strategy (URLGeter): inherite the parent class
+        """
         self.strategy = strategy
 
     def form_url(self, **kwargs):
