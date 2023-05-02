@@ -1,8 +1,13 @@
 # Ignore the thoughts
 Рассуждения над задачей.txt
+browser.txt
 
 # ignore the env files
 *.env
 
 # ignore python pyc files
 *.pyc
+
+# ignore zip files
+*.zip
+*.7z
