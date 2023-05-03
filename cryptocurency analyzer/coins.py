@@ -12,13 +12,10 @@ class DataCollector():
     Actual prices of crypto coins
     """    """"""
 
-    def __init__(self, base_coin, secondary_coin, api_token) -> None:
+    def __init__(self) -> None:
         """Constructor of the DataCollector object
         Args: coin - is the actual coin name"""
-
-        self.base_coin = base_coin
-        self.secondary_coin = secondary_coin
-        self.api_token = api_token
+        ...
 
     async def get_coin_price(self, url: str) -> dict:
         """
