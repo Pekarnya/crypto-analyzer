@@ -15,6 +15,12 @@ class CurrencyStatistics:
     """
      Provides statistical methods for currency exchange markets
     """
+
+    CURRENCY_EXCHANGE_RATE = "CURRENCY_EXCHANGE_RATE"
+    DAILI_TIME_SERIES = "Time Series (Digital Currency Daily)"
+    API_CURENCY_DAILY = "DIGITAL_CURRENCY_DAILY"
+    STANDART_MARKET = "USD"
+
     def __init__(self, token_name: str, file_name: str, base_coin: str,
                  second_coin: str) -> None:
 
@@ -25,17 +31,17 @@ class CurrencyStatistics:
         # f.e BTC
         self.base_coin = base_coin
         kwargs_base_coin = {
-            "function_name": "DIGITAL_CURRENCY_DAILY",
+            "function_name": self.API_CURENCY_DAILY,
             "symbol": self.base_coin,
-            "market": "USD",
+            "market": self.STANDART_MARKET,
             "api_token": self.token
         }
         # f.e ETH
         self.second_coin = second_coin
         kwargs_second_coin = {
-            "function_name": "DIGITAL_CURRENCY_DAILY",
+            "function_name": self.API_CURENCY_DAILY,
             "symbol": self.second_coin,
-            "market": "USD",
+            "market": self.STANDART_MARKET,
             "api_token": self.token
         }
 
@@ -44,8 +50,10 @@ class CurrencyStatistics:
         self.url_instance = url.GetURLRequest()
         self.curr_url_instance = self.url_instance
         self.url_instance.set_strategy(url.DailyExchange())
+
         self._base_coin_url = self.__url_getter(self.url_instance,
                                                 **kwargs_base_coin)
+
         self._second_coin_url = self.__url_getter(self.url_instance,
                                                   **kwargs_second_coin)
 
@@ -65,7 +73,8 @@ class CurrencyStatistics:
     def __single_day_keys(period_data_coin: dict,
                           last_period_keys: list) -> list:
 
-        period_coin_keys: list = list(itertools.islice(period_data_coin[last_period_keys[0]].keys(), 0, 8, 2))
+        period_data = period_data_coin[last_period_keys[0]]
+        period_coin_keys = list(itertools.islice(period_data.keys(), 0, 8, 2))
         return period_coin_keys
 
     @staticmethod
@@ -148,29 +157,44 @@ class CurrencyStatistics:
             np.ndarray: Two array that contain historical data of
             prices for the past periods
         """        """"""
-        base_coin_weakly_data = asyncio.run(self.base_coin.get_coin_price(self._base_coin_url))
-        second_coin_weakly_data = asyncio.run(self.second_coin.get_coin_price(self._second_coin_url))
+        base_coin_weakly_data = asyncio.run(
+            self.base_coin.get_coin_price(self._base_coin_url))
+        second_coin_weakly_data = asyncio.run(self.second_coin.get_coin_price(
+            self._second_coin_url))
 
-        if "output" not in base_coin_weakly_data.keys() or "output" not in second_coin_weakly_data.keys():
+        if "output" not in base_coin_weakly_data.keys() \
+                or "output" not in second_coin_weakly_data.keys():
             return None
 
-        base_coin_stats = base_coin_weakly_data.get("output")
-        second_coin_stats = second_coin_weakly_data.get("output")
+        base_coin_stats: dict = base_coin_weakly_data.get("output")
+        second_coin_stats: dict = second_coin_weakly_data.get("output")
 
-        if "Time Series (Digital Currency Daily)" not in base_coin_stats.keys() or "Time Series (Digital Currency Daily)" not in second_coin_stats.keys():
+        if (
+            self.DAILI_TIME_SERIES not in list(base_coin_stats.keys())
+                or self.DAILI_TIME_SERIES not in list(second_coin_stats.keys())
+                ):
+            if ("Error Message" in base_coin_stats.keys()
+                    or "Error Message" in second_coin_stats.keys()):
+
+                error = list(second_coin_stats.keys())
+                print(f"error is here: {error}")
+
+                print("Alpha vantage did not responsed, going to reserve way")
             return None
 
-        base_coin_data: dict = base_coin_stats["Time Series (Digital Currency Daily)"]
-        second_coin_data: dict = second_coin_stats["Time Series (Digital Currency Daily)"]
-        base_coin_period_keys: list = list(itertools.islice(base_coin_data.keys(), days))
+        base_coin_data: dict = base_coin_stats[self.DAILI_TIME_SERIES]
+        second_coin_data: dict = second_coin_stats[self.DAILI_TIME_SERIES]
+        base_coin_period_keys: list = list(
+            itertools.islice(base_coin_data.keys(), days))
+
         second_coin_period_keys: list = list(itertools.islice
                                              (second_coin_data.keys(), days))
 
-        base_coin_data_from_period = self.__dict_collection(base_coin_data,
-                                                            base_coin_period_keys)
+        base_coin_data_from_period = self.__dict_collection(
+            base_coin_data, base_coin_period_keys)
 
-        second_coin_data_from_period = self.__dict_collection(second_coin_data,
-                                                              second_coin_period_keys)
+        second_coin_data_from_period = self.__dict_collection(
+            second_coin_data, second_coin_period_keys)
 
         base_coin_keys = self.__single_day_keys(base_coin_data_from_period,
                                                 base_coin_period_keys)
@@ -182,9 +206,9 @@ class CurrencyStatistics:
                                                    base_coin_period_keys,
                                                    base_coin_keys)
 
-        daily_second_coin_data = self.__wraper_price(second_coin_data_from_period,
-                                                     second_coin_period_keys,
-                                                     second_coin_keys)
+        daily_second_coin_data = self.__wraper_price(
+            second_coin_data_from_period, second_coin_period_keys,
+            second_coin_keys)
 
         return daily_base_coin_data, daily_second_coin_data
 
@@ -202,9 +226,9 @@ class CurrencyStatistics:
             dict: Metadata dictionary
         """
         kwargs = {
-            "function_name": "CURRENCY_EXCHANGE_RATE",
+            "function_name": self.CURRENCY_EXCHANGE_RATE,
             "base_coin": coin,
-            "secondary_coin": "USD",
+            "secondary_coin": self.STANDART_MARKET,
             "api_token": self.token
         }
         current_price_coin = DataCollector()
