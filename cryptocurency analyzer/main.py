@@ -7,6 +7,7 @@ run this module
 import time
 import schedule
 from currency import CurrencyStatistics
+import datare
 
 
 def price_tracker(pirson_corr: float, coins: CurrencyStatistics,
@@ -16,7 +17,8 @@ def price_tracker(pirson_corr: float, coins: CurrencyStatistics,
 
     This function uses the AlphaVantage API to track changes in the price of a
     cryptocurrency over time. It calculates the decoupled price action of the
-    cryptocurrency and logs it to provide visibility into how the price is changing.
+    cryptocurrency and logs it to provide visibility into how the price is
+    changing.
 
     Args:
         pirson_corr (float): Pearson Product Moment Correlation
@@ -71,7 +73,7 @@ def price_tracker(pirson_corr: float, coins: CurrencyStatistics,
 
     i = 0
     while True:
-        if i > 5:
+        if i > 10:
             i = 0
         schedule.run_pending()
         i += 1
@@ -91,8 +93,9 @@ def price_tracker(pirson_corr: float, coins: CurrencyStatistics,
                                                            pirson_corr)
             print(f"Decoupled price action:{decoupled_coin_price_action}")
 
-            counter_dict: dict = price_action_cummulative(coin_price_action,
-                                                          decoupled_coin_price_action)
+            counter_dict: dict = price_action_cummulative(
+                coin_price_action,
+                decoupled_coin_price_action)
 
             decoupling_price_action_hour = counter_dict["decoupled"]
 
@@ -120,12 +123,22 @@ def main():
         btc = "BTC"
         eth = "ETH"
         coins = CurrencyStatistics("VANTAGE", "./API.env", btc, eth)
-        btc_prices, eth_prices = coins.historic_data(7)
+
+        prices = coins.historic_data(7)
+        if prices is None:
+            print("Bad response, going in alternative way")
+            btc_prices, eth_prices = datare.reserve_data()
+
+        else:
+            btc_prices, eth_prices = coins.historic_data(7)
+
         if btc_prices is None or eth_prices is None:
             print("Bad response from API")
 
     pirson_corr = coins.pirson_coef(btc_prices, eth_prices)
     print(f"correlation last period is: {pirson_corr}")
+
+    # if you have premium API token set is_premium=True
     price_tracker(pirson_corr, coins, eth, is_premium=False)
 
 
